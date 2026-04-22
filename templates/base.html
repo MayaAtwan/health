@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FitMind AI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="page-bg"></div>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">
+                <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI logo">
+            </div>
+            <div>
+                <h1 class="brand-title">FitMind AI</h1>
+                <p class="brand-subtitle">Health & Sport Knowledge Assistant</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function fillQuestion(text) {
+            const input = document.getElementById("question");
+            if (input) {
+                input.value = text;
+                input.focus();
+            }
+        }
+
+        function showLoading() {
+            const btn = document.getElementById("ask-btn");
+            if (btn) {
+                btn.innerText = "Thinking...";
+                btn.disabled = true;
+            }
+        }
+
+        function countChars() {
+            const input = document.getElementById("question");
+            const counter = document.getElementById("char-counter");
+            if (input && counter) {
+                counter.innerText = input.value.length + " characters";
+            }
+        }
+
+        window.addEventListener("load", countChars);
+    </script>
+</body>
+</html>

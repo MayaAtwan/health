@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}FitMind AI | Fitness Coach Studio{% endblock %}
+
+{% block content %}
+<section class="studio-shell" aria-label="FitMind AI fitness coach studio">
+    <section class="studio-hero">
+        <div class="hero-copy">
+            <div class="brand-lockup">
+                <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI logo">
+                <span>FitMind Studio</span>
+            </div>
+            <span class="eyebrow">AI fitness coach</span>
+            <h1>Pick a mission. Get a smarter health plan.</h1>
+            <p>
+                A visual coach experience for workouts, food, recovery, and healthy goals.
+                The design is inspired by fitness studios, sport trackers, and wellness apps.
+            </p>
+        </div>
+
+        <div class="hero-art">
+            <img src="{{ url_for('static', filename='images/wellness-hero.svg') }}" alt="Fitness, nutrition, and recovery illustration">
+            <div class="pulse-card">
+                <span class="pulse-dot"></span>
+                <strong>Coach online</strong>
+            </div>
+            <div class="score-card">
+                <span>86</span>
+                <small>ready</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="studio-layout">
+        <aside class="mission-panel" aria-label="Fitness missions">
+            <div class="panel-heading">
+                <span class="eyebrow">Choose your focus</span>
+                <h2>Fitness missions</h2>
+            </div>
+
+            <div class="mission-grid">
+                <button type="button" class="mission-card mission-training" onclick="chooseMission('Build me a simple beginner full body workout for this week.', this)">
+                    <img src="{{ url_for('static', filename='images/training-card.svg') }}" alt="">
+                    <span>
+                        <strong>Train</strong>
+                        <small>Workout plans, cardio, strength.</small>
+                    </span>
+                </button>
+
+                <button type="button" class="mission-card mission-fuel" onclick="chooseMission('What should I eat before and after a workout?', this)">
+                    <img src="{{ url_for('static', filename='images/nutrition-card.svg') }}" alt="">
+                    <span>
+                        <strong>Fuel</strong>
+                        <small>Protein, meals, hydration.</small>
+                    </span>
+                </button>
+
+                <button type="button" class="mission-card mission-recover" onclick="chooseMission('How can I recover better after a hard workout?', this)">
+                    <img src="{{ url_for('static', filename='images/recovery-card.svg') }}" alt="">
+                    <span>
+                        <strong>Recover</strong>
+                        <small>Sleep, soreness, rest days.</small>
+                    </span>
+                </button>
+
+                <button type="button" class="mission-card mission-goal" onclick="chooseMission('How can I lose weight in a healthy and sustainable way?', this)">
+                    <img src="{{ url_for('static', filename='images/wellness-hero.svg') }}" alt="">
+                    <span>
+                        <strong>Goals</strong>
+                        <small>Weight loss, muscle, habits.</small>
+                    </span>
+                </button>
+            </div>
+
+            <div class="studio-note">
+                <strong>Concept</strong>
+                <span>Health and sport are shown through energetic visuals, fitness-tracker details, green wellness colors, and an AI coach chat.</span>
+            </div>
+        </aside>
+
+        <section class="coach-console" aria-label="FitMind AI chat">
+            <header class="console-header">
+                <div>
+                    <span class="eyebrow">Coach console</span>
+                    <h2>Ask FitMind AI</h2>
+                </div>
+                <button type="button" class="random-btn" onclick="surprisePrompt()">Surprise mission</button>
+            </header>
+
+            <div class="messages-area" id="messages-area" aria-live="polite">
+                {% if not question and not answer %}
+                <div class="message-row bot-row intro-row">
+                    <div class="message-avatar bot-avatar">
+                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                    </div>
+                    <div class="message-bubble bot-bubble">
+                        <div class="message-label">FitMind AI</div>
+                        <p>Choose one mission card, or type your own fitness question. I will answer like a practical AI coach.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if question %}
+                <div class="message-row user-row">
+                    <div class="message-avatar user-avatar">You</div>
+                    <div class="message-bubble user-bubble">
+                        <div class="message-label">Your mission</div>
+                        <p>{{ question }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="message-row bot-row thinking-row" id="thinking-row" style="display:none;">
+                    <div class="message-avatar bot-avatar">
+                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                    </div>
+                    <div class="message-bubble bot-bubble">
+                        <div class="message-label">FitMind AI</div>
+                        <div class="typing-dots" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <p class="thinking-text">Building your coach response...</p>
+                    </div>
+                </div>
+
+                {% if answer %}
+                <div class="message-row bot-row">
+                    <div class="message-avatar bot-avatar">
+                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                    </div>
+                    <div class="message-bubble bot-bubble answer-bubble">
+                        <div class="message-label">Coach answer</div>
+                        <p>{{ answer }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <form method="POST" class="chat-form" onsubmit="showThinkingState()">
+                <label for="question" class="input-label">Your question</label>
+                <div class="input-wrap">
+                    <textarea
+                        id="question"
+                        name="question"
+                        placeholder="Example: Create a 3-day workout plan for a beginner."
+                        required
+                        rows="3"
+                        oninput="countChars()"
+                    >{{ question or '' }}</textarea>
+                    <button type="submit" id="ask-btn">Send</button>
+                </div>
+                <div class="chat-meta">
+                    <span id="char-counter">0 characters</span>
+                    <span>Best answers include your goal, level, and weekly schedule.</span>
+                </div>
+            </form>
+        </section>
+    </section>
+</section>
+
+<script>
+    const promptIdeas = [
+        "Create a 3-day workout plan for a beginner.",
+        "What should I eat before and after strength training?",
+        "How can I improve recovery after cardio?",
+        "Explain healthy weight loss in simple steps.",
+        "How do I combine cardio and strength in one week?"
+    ];
+
+    function showThinkingState() {
+        const btn = document.getElementById("ask-btn");
+        const thinkingRow = document.getElementById("thinking-row");
+        const messagesArea = document.getElementById("messages-area");
+
+        if (btn) {
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+        }
+
+        if (thinkingRow) {
+            thinkingRow.style.display = "flex";
+        }
+
+        if (messagesArea) {
+            setTimeout(() => {
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }, 50);
+        }
+    }
+
+    function chooseMission(text, source) {
+        const input = document.getElementById("question");
+
+        document.querySelectorAll(".mission-card").forEach((card) => {
+            card.classList.remove("is-selected");
+        });
+
+        if (source) {
+            source.classList.add("is-selected");
+        }
+
+        if (input) {
+            input.value = text;
+            input.focus();
+            countChars();
+        }
+    }
+
+    function surprisePrompt() {
+        const nextPrompt = promptIdeas[Math.floor(Math.random() * promptIdeas.length)];
+        chooseMission(nextPrompt);
+    }
+
+    function countChars() {
+        const input = document.getElementById("question");
+        const counter = document.getElementById("char-counter");
+        if (input && counter) {
+            counter.innerText = input.value.length + " characters";
+        }
+    }
+
+    window.addEventListener("load", () => {
+        countChars();
+        const messagesArea = document.getElementById("messages-area");
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

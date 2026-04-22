@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" role="img" aria-labelledby="title">
+  <title id="title">Training illustration</title>
+  <rect width="420" height="260" rx="28" fill="#e8f7ef"/>
+  <circle cx="324" cy="72" r="54" fill="#cceedd"/>
+  <rect x="82" y="126" width="256" height="22" rx="11" fill="#245d7a"/>
+  <circle cx="70" cy="137" r="30" fill="#138a52"/>
+  <circle cx="350" cy="137" r="30" fill="#138a52"/>
+  <rect x="184" y="76" width="52" height="60" rx="24" fill="#1fb86b"/>
+  <circle cx="210" cy="54" r="24" fill="#ffbe7b"/>
+  <path d="M158 190 C198 170 244 170 286 190" fill="none" stroke="#245d7a" stroke-width="14" stroke-linecap="round"/>
+</svg>

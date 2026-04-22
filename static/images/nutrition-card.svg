@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" role="img" aria-labelledby="title">
+  <title id="title">Nutrition illustration</title>
+  <rect width="420" height="260" rx="28" fill="#fff2dd"/>
+  <circle cx="210" cy="132" r="86" fill="#fff"/>
+  <circle cx="174" cy="124" r="34" fill="#ff7f50"/>
+  <path d="M206 92 C236 74 272 88 286 120 C260 136 222 128 206 92 Z" fill="#1fb86b"/>
+  <path d="M196 160 C224 142 266 148 288 178 C260 202 220 198 196 160 Z" fill="#245d7a"/>
+  <rect x="78" y="188" width="264" height="16" rx="8" fill="#d7b57b"/>
+  <circle cx="92" cy="72" r="22" fill="#1fb86b"/>
+  <circle cx="334" cy="78" r="28" fill="#ffbf7b"/>
+</svg>

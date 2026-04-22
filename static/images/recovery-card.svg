@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" role="img" aria-labelledby="title">
+  <title id="title">Recovery illustration</title>
+  <rect width="420" height="260" rx="28" fill="#e9f4f8"/>
+  <path d="M70 172 C116 132 168 132 210 170 C256 212 320 206 360 160" fill="none" stroke="#245d7a" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="160" cy="94" r="30" fill="#ffbe7b"/>
+  <path d="M182 118 C214 130 240 154 258 188" fill="none" stroke="#138a52" stroke-width="18" stroke-linecap="round"/>
+  <path d="M138 122 C106 138 88 160 78 190" fill="none" stroke="#138a52" stroke-width="18" stroke-linecap="round"/>
+  <rect x="236" y="70" width="86" height="54" rx="18" fill="#fff"/>
+  <path d="M254 98 L272 98 L280 84 L294 112 L302 98 L318 98" fill="none" stroke="#1fb86b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
