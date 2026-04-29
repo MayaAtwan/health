@@ -1,21 +1,86 @@
 import json
 import os
+import secrets
 import uuid
+from pathlib import Path
+from time import time
+
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fitmind-dev-secret")
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 KNOWLEDGE_BASE_ID = os.environ.get("BEDROCK_KNOWLEDGE_BASE_ID", "")
 MODEL_ARN = os.environ.get("BEDROCK_MODEL_ARN", "")
-MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "us.anthropic.claude-3-5-haiku-20241022-v1:0")
-AGENT_ID = os.environ.get("BEDROCK_AGENT_ID", "")
-AGENT_ALIAS_ID = os.environ.get("BEDROCK_AGENT_ALIAS_ID", "")
 MAX_HISTORY = 12
 MAX_CHATS = 6
+CHAT_STORAGE_DIR = Path(app.instance_path) / "chat_sessions"
+CHAT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 2
+
+
+def ensure_chat_storage_dir() -> None:
+    CHAT_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def cleanup_expired_chat_sessions() -> None:
+    ensure_chat_storage_dir()
+    cutoff = time() - CHAT_SESSION_TTL_SECONDS
+
+    for session_file in CHAT_STORAGE_DIR.glob("*.json"):
+        try:
+            if session_file.stat().st_mtime < cutoff:
+                session_file.unlink()
+        except OSError:
+            continue
+
+
+def get_session_chat_id() -> str:
+    session_chat_id = session.get("chat_session_id")
+
+    if session_chat_id:
+        return session_chat_id
+
+    session_chat_id = secrets.token_hex(16)
+    session["chat_session_id"] = session_chat_id
+    session.modified = True
+    return session_chat_id
+
+
+def get_chat_store_path() -> Path:
+    cleanup_expired_chat_sessions()
+    return CHAT_STORAGE_DIR / f"{get_session_chat_id()}.json"
+
+
+def load_chats_from_store() -> list:
+    store_path = get_chat_store_path()
+
+    if not store_path.exists():
+        return []
+
+    try:
+        with store_path.open("r", encoding="utf-8") as handle:
+            stored = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    return stored if isinstance(stored, list) else []
+
+
+def save_chats_to_store(chats: list) -> None:
+    store_path = get_chat_store_path()
+    temp_path = store_path.with_suffix(".tmp")
+
+    with temp_path.open("w", encoding="utf-8") as handle:
+        json.dump(chats[:MAX_CHATS], handle, ensure_ascii=False)
+
+    temp_path.replace(store_path)
 
 
 def new_chat(title: str = "New chat") -> dict:
@@ -27,17 +92,15 @@ def new_chat(title: str = "New chat") -> dict:
 
 
 def get_chats() -> list:
-    chats = session.get("chats")
+    chats = load_chats_from_store()
 
     if chats:
         return chats
 
-    legacy_history = session.pop("chat_history", [])
     first_chat = new_chat("Current chat")
-    first_chat["messages"] = legacy_history
-    session["chats"] = [first_chat]
     session["active_chat_id"] = first_chat["id"]
-    return session["chats"]
+    save_chats_to_store([first_chat])
+    return [first_chat]
 
 
 def get_active_chat(chats: list) -> dict:
@@ -52,7 +115,7 @@ def get_active_chat(chats: list) -> dict:
 
 
 def save_chats(chats: list) -> None:
-    session["chats"] = chats[:MAX_CHATS]
+    save_chats_to_store(chats)
     session.modified = True
 
 
@@ -103,86 +166,38 @@ def render_home(question: str, chats: list, active_chat: dict, chat_history: lis
     )
 
 
-def claude_complete(prompt: str) -> str:
-    bedrock = boto3.client("bedrock-runtime", region_name=REGION)
-
-    body = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 400,
-        "temperature": 0.2,
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt}
-                ]
-            }
-        ]
-    }
-
-    try:
-        resp = bedrock.invoke_model(
-            modelId=MODEL_ID,
-            body=json.dumps(body),
-            contentType="application/json",
-            accept="application/json",
-        )
-
-        payload = resp["body"].read()
-        data = json.loads(payload)
-        parts = data.get("content", [])
-        text = "".join(
-            part.get("text", "")
-            for part in parts
-            if isinstance(part, dict) and part.get("type") == "text"
-        )
-        return text.strip()
-    except ClientError as exc:
-        msg = exc.response.get("Error", {}).get("Message", str(exc))
-        raise RuntimeError(f"Bedrock InvokeModel failed: {msg}") from exc
-
-
-def invoke_bedrock_agent(prompt: str) -> str:
-    if not AGENT_ID or not AGENT_ALIAS_ID:
-        return "Set BEDROCK_AGENT_ID and BEDROCK_AGENT_ALIAS_ID to use a Bedrock Agent."
-
-    client = boto3.client("bedrock-agent-runtime", region_name=REGION)
-    session_id = str(uuid.uuid4())
-
-    try:
-        response = client.invoke_agent(
-            agentId=AGENT_ID,
-            agentAliasId=AGENT_ALIAS_ID,
-            sessionId=session_id,
-            inputText=prompt,
-        )
-
-        output_parts = []
-
-        for event in response.get("completion", []):
-            chunk = event.get("chunk")
-            if chunk and "bytes" in chunk:
-                output_parts.append(chunk["bytes"].decode("utf-8"))
-
-        return "".join(output_parts).strip()
-    except NoCredentialsError:
-        return "AWS credentials were not found."
-    except ClientError as exc:
-        return f"AWS error: {exc.response['Error']['Message']}"
-    except Exception as exc:  # pragma: no cover - AWS runtime behavior
-        return f"Unexpected error: {exc}"
-
-
 def query_bedrock_knowledge_base(question: str, answer_style: str = "simple") -> dict:
     if not KNOWLEDGE_BASE_ID or not MODEL_ARN:
         return {
-            "answer": "Set BEDROCK_KNOWLEDGE_BASE_ID and BEDROCK_MODEL_ARN before querying the knowledge base.",
-            "source": "Configuration needed",
+            "answer": "The knowledge base is not configured yet. Add the Bedrock settings, then try your question again.",
+            "source": "App setup needed",
             "related_questions": [],
         }
 
-    style_prompt = "Answer simply and clearly." if answer_style == "simple" else "Answer in detail."
-    prompt = f"{style_prompt} Use the knowledge base results only.\n\nQuestion: {question}"
+    if answer_style == "simple":
+        style_prompt = (
+            "Answer in a short, clear, friendly way. "
+            "Use simple language and keep it practical."
+        )
+    else:
+        style_prompt = (
+            "Answer in a clear, detailed, well-structured way. "
+            "Explain the idea step by step when useful."
+        )
+
+    prompt = f"""
+You are a healthy recipe and food habit assistant.
+
+Use only the information retrieved from the knowledge base.
+If the knowledge base does not contain enough information, say that clearly.
+Do not make up facts.
+Keep the answer focused on recipes, ingredients, meals, or healthy eating habits.
+
+{style_prompt}
+
+User question:
+{question}
+""".strip()
     client = boto3.client("bedrock-agent-runtime", region_name=REGION)
 
     try:
@@ -203,20 +218,20 @@ def query_bedrock_knowledge_base(question: str, answer_style: str = "simple") ->
         )
     except NoCredentialsError:
         return {
-            "answer": "AWS credentials were not found.",
-            "source": "AWS credentials",
+            "answer": "AWS credentials are missing, so the app cannot reach Bedrock right now.",
+            "source": "AWS sign-in needed",
             "related_questions": [],
         }
     except ClientError as exc:
         return {
-            "answer": f"AWS error: {exc.response['Error']['Message']}",
-            "source": "Amazon Bedrock",
+            "answer": "Bedrock returned an error while trying to answer your question. Check the AWS setup and try again.",
+            "source": "Amazon Bedrock error",
             "related_questions": [],
         }
     except Exception as exc:  # pragma: no cover - AWS runtime behavior
         return {
-            "answer": f"Unexpected error: {exc}",
-            "source": "Amazon Bedrock",
+            "answer": "Something unexpected happened while generating the answer. Please try again.",
+            "source": "App runtime issue",
             "related_questions": [],
         }
 
@@ -304,4 +319,8 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(
+        host=os.environ.get("HOST", "0.0.0.0"),
+        port=int(os.environ.get("PORT", "5000")),
+        debug=os.environ.get("FLASK_DEBUG", "0") == "1",
+    )
