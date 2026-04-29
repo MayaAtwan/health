@@ -79,7 +79,7 @@ def build_chat_summaries(chats: list) -> list:
             (message for message in reversed(chat["messages"]) if message["role"] == "user"),
             None,
         )
-        preview_source = last_user_message["text"] if last_user_message else "Start a new fitness question."
+        preview_source = last_user_message["text"] if last_user_message else "Start a new recipe or healthy eating question."
         preview = preview_source[:68] + ("..." if len(preview_source) > 68 else "")
 
         summaries.append({
@@ -236,8 +236,8 @@ def query_bedrock_knowledge_base(question: str, answer_style: str = "simple") ->
         "answer": response.get("output", {}).get("text", "").strip() or "No answer returned from Bedrock.",
         "source": ", ".join(source_names[:2]) if source_names else "Amazon Bedrock Knowledge Base",
         "related_questions": [
-            "Can you summarize that answer?",
-            "Which document did this come from?",
+            "Can you turn that into a simple recipe?",
+            "Can you make that fit a healthier eating plan?",
         ],
     }
 
@@ -287,10 +287,10 @@ def home():
             if active_chat["title"] in {"New chat", "Current chat"}:
                 active_chat["title"] = question[:42] + ("..." if len(question) > 42 else "")
 
-            chat_history.append({"role": "user", "label": "Your mission", "text": question})
+            chat_history.append({"role": "user", "label": "Your note", "text": question})
             chat_history.append({
                 "role": "bot",
-                "label": "Coach answer",
+                "label": "Journal answer",
                 "text": result["answer"],
                 "source": result["source"],
                 "related_questions": result["related_questions"],

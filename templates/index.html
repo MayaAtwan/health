@@ -1,96 +1,125 @@
 {% extends "base.html" %}
 
-{% block title %}FitMind AI | Fitness Coach Studio{% endblock %}
+{% block title %}Healthy Recipe Journal | Healthy Food Story{% endblock %}
 
 {% block content %}
-<section class="page-motto" aria-label="FitMind AI motto">
-    <span class="motto-kicker">Train smarter. Live brighter.</span>
-    <h2>Fuel your goals, move with purpose, recover with confidence.</h2>
-</section>
-
-<section class="hero-ribbon" aria-label="Fitness and wellness overview">
-    <div class="hero-main-visual">
-        <img src="{{ url_for('static', filename='images/wellness-hero.svg') }}" alt="Fitness, nutrition, and recovery illustration">
-        <div class="hero-main-copy">
-            <span class="eyebrow">Health and fitness</span>
-            <strong>One place for training, fuel, and recovery</strong>
-            <p>Ask sharper questions, build better habits, and move with a clearer plan.</p>
+<section class="hero-story" aria-label="Recipe journal introduction">
+    <div class="story-copy">
+        <span class="section-tag hero-kicker">From bad eating to balanced eating</span>
+        <h2>Real meals. Better habits. A healthier food story that finally felt sustainable.</h2>
+        <div class="story-body">
+            <p>
+                These recipes came out of my fitness journal after I changed the way I ate, kept the food simple,
+                and lost more than 15 kilograms without making life feel strict.
+            </p>
+            <div class="story-inline-facts" aria-label="Journey highlights">
+                <span>15+ kg lost</span>
+                <span>Home-tested recipes</span>
+                <span>Easy to repeat</span>
+            </div>
         </div>
     </div>
 
-    <button type="button" class="hero-focus-card flip-card training-card" onclick="toggleFlip(this)" aria-pressed="false">
-        <span class="hero-focus-inner">
-            <span class="hero-focus-face hero-focus-front">
-                <img src="{{ url_for('static', filename='images/training-card.svg') }}" alt="Workout planning illustration">
-                <span class="hero-focus-copy">
-                    <strong>Training plans</strong>
-                    <p>Build structure, weekly rhythm, and smart progress.</p>
-                </span>
-            </span>
-            <span class="hero-focus-face hero-focus-back">
-                <span class="flip-tag">Motivation</span>
-                <strong>Small sessions build strong results.</strong>
-                <p>Keep showing up. Consistency grows power faster than one perfect week.</p>
-            </span>
-        </span>
-    </button>
-
-    <button type="button" class="hero-focus-card flip-card nutrition-card" onclick="toggleFlip(this)" aria-pressed="false">
-        <span class="hero-focus-inner">
-            <span class="hero-focus-face hero-focus-front">
-                <img src="{{ url_for('static', filename='images/nutrition-card.svg') }}" alt="Nutrition guidance illustration">
-                <span class="hero-focus-copy">
-                    <strong>Nutrition support</strong>
-                    <p>Match meals and hydration to your goals and schedule.</p>
-                </span>
-            </span>
-            <span class="hero-focus-face hero-focus-back">
-                <span class="flip-tag">Motivation</span>
-                <strong>Fuel with intention and your body answers back.</strong>
-                <p>Every balanced meal is a quiet step toward better energy and better training.</p>
-            </span>
-        </span>
-    </button>
-
-    <button type="button" class="hero-focus-card flip-card recovery-card" onclick="toggleFlip(this)" aria-pressed="false">
-        <span class="hero-focus-inner">
-            <span class="hero-focus-face hero-focus-front">
-                <img src="{{ url_for('static', filename='images/recovery-card.svg') }}" alt="Recovery guidance illustration">
-                <span class="hero-focus-copy">
-                    <strong>Recovery habits</strong>
-                    <p>Recover better so the next session feels stronger.</p>
-                </span>
-            </span>
-            <span class="hero-focus-face hero-focus-back">
-                <span class="flip-tag">Motivation</span>
-                <strong>Recovery is where strength learns to stay.</strong>
-                <p>Rest is not falling behind. It is how your progress becomes real and sustainable.</p>
-            </span>
-        </span>
-    </button>
+    <div class="story-visual">
+        <article class="hero-photo-card hero-photo-main">
+            <img class="hero-salmon-image" src="{{ url_for('static', filename='images/salmon-original.png') }}" alt="Baked salmon with lemon slices">
+        </article>
+        <div class="hero-image-meta">
+            <span class="section-tag">Weekly favorite</span>
+            <strong>Lemon salmon tray</strong>
+            <p>One of the easiest healthy dinners to keep on repeat during the week.</p>
+        </div>
+    </div>
 </section>
 
-<section class="chat-shell" aria-label="FitMind AI fitness coach studio">
+<section class="recipe-gallery" aria-label="Featured healthy recipes">
+    <div class="section-heading">
+        <span class="section-tag">Featured plates</span>
+        <h3>A simple recipe row from the same journey.</h3>
+    </div>
+
+    <div class="mini-recipe-row">
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Lemon salmon tray', 'A simple high-protein dinner that became one of the easiest healthy repeats in my week.')">
+            <img src="{{ url_for('static', filename='images/salmon-original.png') }}" alt="Baked salmon with lemon slices">
+            <div class="recipe-copy">
+                <span>Dinner</span>
+                <strong>Lemon salmon tray</strong>
+            </div>
+        </button>
+
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Fruit pancakes', 'A lighter breakfast idea that still feels fun, sweet, and filling.')">
+            <img src="{{ url_for('static', filename='images/pancakes-original.png') }}" alt="Mini pancakes topped with strawberries and blueberries">
+            <div class="recipe-copy">
+                <span>Breakfast</span>
+                <strong>Fruit pancakes</strong>
+            </div>
+        </button>
+
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Garlic shrimp', 'A quick stovetop meal for busy days when healthy food needs to stay easy.')">
+            <img src="{{ url_for('static', filename='images/shrimp-enhanced.png') }}" alt="Shrimp cooked in a pan with herbs">
+            <div class="recipe-copy">
+                <span>Quick meal</span>
+                <strong>Garlic shrimp</strong>
+            </div>
+        </button>
+
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Energy bites', 'A better snack idea for sweet cravings without going back to old eating patterns.')">
+            <img src="{{ url_for('static', filename='images/energy-bites-original.png') }}" alt="Energy bites drizzled with chocolate">
+            <div class="recipe-copy">
+                <span>Snack</span>
+                <strong>Energy bites</strong>
+            </div>
+        </button>
+
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Seafood soup', 'Comfort food can still fit a healthier routine when the ingredients support your goals.')">
+            <img src="{{ url_for('static', filename='images/seafood-soup-original.png') }}" alt="Seafood soup in a white bowl">
+            <div class="recipe-copy">
+                <span>Comfort bowl</span>
+                <strong>Seafood soup</strong>
+            </div>
+        </button>
+
+        <button type="button" class="recipe-card recipe-card-mini recipe-card-button" onclick="openRecipeMessage('Ingredient haul', 'Healthy eating gets easier when the kitchen is already stocked with better options.')">
+            <img class="ingredients-grid-image" src="{{ url_for('static', filename='images/ingredients-original.png') }}" alt="Healthy ingredients and protein products arranged on a table">
+            <div class="recipe-copy">
+                <span>Prep day</span>
+                <strong>Ingredient haul</strong>
+            </div>
+        </button>
+    </div>
+</section>
+
+<div class="recipe-message-modal" id="recipe-message-modal" aria-hidden="true">
+    <div class="recipe-message-backdrop" onclick="closeRecipeMessage()"></div>
+    <div class="recipe-message-card" role="dialog" aria-modal="true" aria-labelledby="recipe-message-title">
+        <button type="button" class="recipe-message-close" onclick="closeRecipeMessage()" aria-label="Close recipe message">Close</button>
+        <span class="section-tag">Recipe note</span>
+        <h3 id="recipe-message-title">Recipe</h3>
+        <p id="recipe-message-text"></p>
+    </div>
+</div>
+
+<section class="chat-shell" aria-label="Recipe journal assistant">
     <aside class="chat-sidebar" aria-label="Recent chats and quick prompts">
         <div class="sidebar-brand">
-            <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI logo">
+            <img class="sidebar-brand-logo" src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
             <div>
-                <strong>FitMind AI</strong>
-                <span>Coach console</span>
+                <strong>Healthy Recipe Journal</strong>
+                <span>Meal and habit helper</span>
             </div>
         </div>
 
         <form method="POST" class="sidebar-new-chat">
             <input type="hidden" name="action" value="new_chat">
-            <button type="submit" class="new-chat-btn">New chat</button>
+            <button type="submit" class="new-chat-btn">New note</button>
         </form>
 
         <div class="sidebar-section chat-history-panel">
             <div class="sidebar-heading">
-                <span class="eyebrow">Temporary history</span>
-                <h2>Recent chats</h2>
+                <span class="section-tag">Saved in session</span>
+                <h2>Recent kitchen notes</h2>
             </div>
-            <p class="section-copy">Saved only in this browser session.</p>
+            <p class="section-copy">Short-term history for this browser session only.</p>
 
             <div class="chat-list">
                 {% for chat in chat_summaries %}
@@ -115,17 +144,16 @@
                 {% endfor %}
             </div>
         </div>
-
     </aside>
 
     <section class="chat-stage" id="coach-console">
-        <section class="chat-card" aria-label="FitMind AI chat">
+        <section class="chat-card" aria-label="Recipe journal chat">
             <header class="chat-card-header">
                 <div class="chat-card-title">
-                    <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                    <img class="sidebar-brand-logo" src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
                     <div>
-                        <strong>FitMind AI</strong>
-                        <span>Wellness assistant</span>
+                        <strong>Healthy Recipe Journal</strong>
+                        <span>Recipe and habit assistant</span>
                     </div>
                 </div>
                 <div class="answer-style" aria-label="Answer style">
@@ -139,7 +167,7 @@
                     </label>
                 </div>
                 <div class="console-actions chat-card-actions">
-                    <button type="button" class="random-btn" onclick="surprisePrompt()">Surprise mission</button>
+                    <button type="button" class="random-btn" onclick="surprisePrompt()">Surprise prompt</button>
                     <form method="POST" class="clear-form">
                         <input type="hidden" name="action" value="clear">
                         <button type="submit" class="clear-btn">Clear</button>
@@ -151,15 +179,15 @@
                 {% if not chat_history %}
                 <div class="message-row bot-row intro-row">
                     <div class="message-avatar bot-avatar">
-                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                        <img src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
                     </div>
                     <div class="message-block">
                         <div class="message-meta">
-                            <strong>FitMind AI</strong>
+                            <strong>Healthy Recipe Journal</strong>
                             <span>Ready now</span>
                         </div>
                         <div class="message-bubble bot-bubble">
-                            <p>Choose a quick mission below or ask your own question. I will answer like a practical fitness coach.</p>
+                            <p>Ask about healthy recipes, portion ideas, meal prep, or how to build better habits around food.</p>
                         </div>
                     </div>
                 </div>
@@ -182,12 +210,12 @@
                 {% else %}
                 <div class="message-row bot-row">
                     <div class="message-avatar bot-avatar">
-                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                        <img src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
                     </div>
                     <div class="message-block">
                         <div class="message-meta">
                             <strong>{{ message.label }}</strong>
-                            <span>Knowledge base</span>
+                            <span>Recipe guide</span>
                         </div>
                         <div class="message-bubble bot-bubble answer-bubble">
                             <p>{{ message.text }}</p>
@@ -209,18 +237,18 @@
 
                 <div class="message-row bot-row thinking-row" id="thinking-row" style="display:none;">
                     <div class="message-avatar bot-avatar">
-                        <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI">
+                        <img src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
                     </div>
                     <div class="message-block">
                         <div class="message-meta">
-                            <strong>FitMind AI</strong>
+                            <strong>Healthy Recipe Journal</strong>
                             <span>Thinking</span>
                         </div>
                         <div class="message-bubble bot-bubble">
                             <div class="typing-dots" aria-hidden="true">
                                 <span></span><span></span><span></span>
                             </div>
-                            <p class="thinking-text">Building your coach response...</p>
+                            <p class="thinking-text">Building your next healthy-food idea...</p>
                         </div>
                     </div>
                 </div>
@@ -228,9 +256,9 @@
 
             <div class="composer-wrap">
                 <div class="composer-suggestions">
-                    <button type="button" onclick="chooseMission('Can you summarize that answer?')">Summarize it</button>
-                    <button type="button" onclick="chooseMission('Which document did this come from?')">Show source</button>
-                    <button type="button" onclick="chooseMission('Quiz me with 3 questions about fitness, nutrition, or recovery.')">Quiz me</button>
+                    <button type="button" onclick="chooseMission('Give me a healthy recipe using shrimp and vegetables.')">Shrimp recipe</button>
+                    <button type="button" onclick="chooseMission('Create a simple snack recipe for sweet cravings.')">Sweet snack idea</button>
+                    <button type="button" onclick="chooseMission('Build a healthy breakfast recipe with fruit and protein.')">Breakfast idea</button>
                 </div>
 
                 <form method="POST" class="chat-form" onsubmit="showThinkingState()">
@@ -239,7 +267,7 @@
                         <textarea
                             id="question"
                             name="question"
-                            placeholder="Ask anything about workouts, food, recovery, or your fitness goals"
+                            placeholder="Ask about healthy recipes, meal ideas, portion balance, or food habits"
                             required
                             rows="2"
                             oninput="countChars()"
@@ -248,54 +276,28 @@
                     </div>
                     <div class="chat-meta">
                         <span id="char-counter">0 characters</span>
-                        <span>Best answers include your goal, level, and weekly schedule.</span>
+                        <span>Best questions mention your goal, available ingredients, and how much time you have.</span>
                     </div>
                 </form>
             </div>
         </section>
-
     </section>
-</section>
-
-<section class="goal-helper" aria-label="Quick goals">
-    <div class="goal-helper-card">
-        <div class="goal-helper-copy">
-            <span class="eyebrow">Quick focus</span>
-            <h3>Feeling lost? Choose your goals and the chat will seek help.</h3>
-            <p>Start here if you are not sure what to ask first. Pick one direction and FitMind AI will help you shape the next step.</p>
-        </div>
-
-        <div class="bottom-missions">
-            <button type="button" class="mission-pill" onclick="chooseMission('Build me a simple beginner full body workout for this week.', this)">
-                Beginner plan
-            </button>
-            <button type="button" class="mission-pill" onclick="chooseMission('What should I eat before and after a workout?', this)">
-                Workout nutrition
-            </button>
-            <button type="button" class="mission-pill" onclick="chooseMission('How can I recover better after a hard workout?', this)">
-                Recovery tips
-            </button>
-            <button type="button" class="mission-pill" onclick="chooseMission('How can I lose weight in a healthy and sustainable way?', this)">
-                Healthy goals
-            </button>
-        </div>
-    </div>
 </section>
 
 <section class="page-note-wrap" aria-label="Important note">
     <div class="studio-note page-note-card">
         <strong>Important note</strong>
-        <span>FitMind AI gives general fitness and wellness information only. It is not medical advice and it is not a replacement for a doctor, dietitian, or nutritionist.</span>
+        <span>This journal shares general food and wellness inspiration only. It is not medical advice and it does not replace a doctor or dietitian.</span>
     </div>
 </section>
 
 <script>
     const promptIdeas = [
-        "Create a 3-day workout plan for a beginner.",
-        "What should I eat before and after strength training?",
-        "How can I improve recovery after cardio?",
-        "Explain healthy weight loss in simple steps.",
-        "How do I combine cardio and strength in one week?"
+        "Give me a healthy seafood recipe for dinner.",
+        "How can I make healthy eating easier when I am craving fast food?",
+        "Build a simple meal prep using salmon, shrimp, and vegetables.",
+        "What are smart snack recipes for a weight-loss journey?",
+        "How do I stay consistent with healthier eating without being too strict?"
     ];
 
     function setAnswerStyle(value) {
@@ -351,21 +353,33 @@
         chooseMission(nextPrompt);
     }
 
+    function openRecipeMessage(title, text) {
+        const modal = document.getElementById("recipe-message-modal");
+        const titleNode = document.getElementById("recipe-message-title");
+        const textNode = document.getElementById("recipe-message-text");
+
+        if (modal && titleNode && textNode) {
+            titleNode.innerText = title;
+            textNode.innerText = text;
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+        }
+    }
+
+    function closeRecipeMessage() {
+        const modal = document.getElementById("recipe-message-modal");
+        if (modal) {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+        }
+    }
+
     function countChars() {
         const input = document.getElementById("question");
         const counter = document.getElementById("char-counter");
         if (input && counter) {
             counter.innerText = input.value.length + " characters";
         }
-    }
-
-    function toggleFlip(card) {
-        if (!card) {
-            return;
-        }
-
-        card.classList.toggle("is-flipped");
-        card.setAttribute("aria-pressed", card.classList.contains("is-flipped") ? "true" : "false");
     }
 
     window.addEventListener("load", () => {
@@ -393,6 +407,12 @@
             form.addEventListener("submit", () => {
                 sessionStorage.setItem("fitmind-scroll-chat", "1");
             });
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeRecipeMessage();
+            }
         });
     });
 </script>

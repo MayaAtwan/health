@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}FitMind AI{% endblock %}</title>
+    <title>{% block title %}Healthy Recipe Journal{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
@@ -11,14 +11,15 @@
 
     <header class="topbar">
         <div class="brand">
-            <div class="brand-icon">
-                <img src="{{ url_for('static', filename='images/fitmind-logo.svg') }}" alt="FitMind AI logo">
+            <div class="brand-logo-wrap">
+                <img class="brand-logo" src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
             </div>
             <div>
-                <h1 class="brand-title">FitMind AI</h1>
-                <p class="brand-subtitle">Health & Sport Knowledge Assistant</p>
+                <p class="brand-overline">Healthy recipe journal</p>
+                <h1 class="brand-title">Healthy Recipe Journal</h1>
             </div>
         </div>
+        <p class="brand-subtitle">Real home recipes shaped by a fitness journey and more than 15 kg lost.</p>
     </header>
 
     <main class="main-container">
@@ -26,14 +27,6 @@
     </main>
 
     <script>
-        function fillQuestion(text) {
-            const input = document.getElementById("question");
-            if (input) {
-                input.value = text;
-                input.focus();
-            }
-        }
-
         function showLoading() {
             const btn = document.getElementById("ask-btn");
             if (btn) {
