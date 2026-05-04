@@ -100,6 +100,10 @@
 </div>
 
 <section class="chat-shell" aria-label="Recipe journal assistant">
+    <form method="POST" id="session-reset-form" style="display:none;">
+        <input type="hidden" name="action" value="reset_session">
+    </form>
+
     <aside class="chat-sidebar" aria-label="Recent chats and quick prompts">
         <div class="sidebar-brand">
             <img class="sidebar-brand-logo" src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
@@ -222,13 +226,6 @@
                             {% if message.source %}
                             <div class="answer-source">Source: {{ message.source }}</div>
                             {% endif %}
-                            {% if message.related_questions %}
-                            <div class="related-questions" aria-label="Related questions">
-                                {% for related in message.related_questions %}
-                                <button type="button" onclick="chooseMission('{{ related }}')">{{ related }}</button>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -261,7 +258,7 @@
                     <button type="button" onclick="chooseMission('Build a healthy breakfast recipe with fruit and protein.')">Breakfast idea</button>
                 </div>
 
-                <form method="POST" class="chat-form" onsubmit="showThinkingState()">
+                <form method="POST" class="chat-form" id="chat-form">
                     <input type="hidden" name="answer_style" id="answer-style-input" value="simple">
                     <div class="input-wrap">
                         <textarea
@@ -330,6 +327,148 @@
         sessionStorage.setItem("fitmind-scroll-chat", "1");
     }
 
+    function hideThinkingState() {
+        const btn = document.getElementById("ask-btn");
+        const thinkingRow = document.getElementById("thinking-row");
+
+        if (btn) {
+            btn.innerText = "^";
+            btn.disabled = false;
+        }
+
+        if (thinkingRow) {
+            thinkingRow.style.display = "none";
+        }
+    }
+
+    function escapeHtml(value) {
+        return value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
+    function scrollMessagesToBottom() {
+        const messagesArea = document.getElementById("messages-area");
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+    }
+
+    function appendUserMessage(text) {
+        const messagesArea = document.getElementById("messages-area");
+        if (!messagesArea) {
+            return;
+        }
+
+        const row = document.createElement("div");
+        row.className = "message-row user-row";
+        row.innerHTML = `
+            <div class="message-avatar user-avatar">You</div>
+            <div class="message-block">
+                <div class="message-meta">
+                    <strong>Your note</strong>
+                    <span>Now</span>
+                </div>
+                <div class="message-bubble user-bubble">
+                    <p>${escapeHtml(text)}</p>
+                </div>
+            </div>
+        `;
+        messagesArea.appendChild(row);
+    }
+
+    function appendBotMessage(text, source) {
+        const messagesArea = document.getElementById("messages-area");
+        if (!messagesArea) {
+            return;
+        }
+
+        const row = document.createElement("div");
+        row.className = "message-row bot-row";
+        row.innerHTML = `
+            <div class="message-avatar bot-avatar">
+                <img src="{{ url_for('static', filename='images/healthy-recipe-logo.svg') }}" alt="Healthy Recipe Journal logo">
+            </div>
+            <div class="message-block">
+                <div class="message-meta">
+                    <strong>Journal answer</strong>
+                    <span>Recipe guide</span>
+                </div>
+                <div class="message-bubble bot-bubble answer-bubble">
+                    <p>${escapeHtml(text)}</p>
+                    ${source ? `<div class="answer-source">Source: ${escapeHtml(source)}</div>` : ""}
+                </div>
+            </div>
+        `;
+        messagesArea.appendChild(row);
+    }
+
+    function removeIntroRow() {
+        const introRow = document.querySelector(".intro-row");
+        if (introRow) {
+            introRow.remove();
+        }
+    }
+
+    async function submitChatForm(event) {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+        const questionInput = document.getElementById("question");
+        const answerStyleInput = document.getElementById("answer-style-input");
+
+        if (!questionInput || !answerStyleInput) {
+            return;
+        }
+
+        const question = questionInput.value.trim();
+        if (!question) {
+            return;
+        }
+
+        removeIntroRow();
+        appendUserMessage(question);
+        showThinkingState();
+        scrollMessagesToBottom();
+
+        const formData = new FormData();
+        formData.append("question", question);
+        formData.append("answer_style", answerStyleInput.value);
+
+        questionInput.value = "";
+        countChars();
+
+        try {
+            const response = await fetch("{{ url_for('ask') }}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const payload = await response.json();
+
+            hideThinkingState();
+
+            if (!response.ok) {
+                appendBotMessage(payload.error || "Something went wrong.", "App runtime issue");
+                scrollMessagesToBottom();
+                return;
+            }
+
+            appendBotMessage(payload.bot_message.text, payload.bot_message.source);
+            scrollMessagesToBottom();
+        } catch (error) {
+            hideThinkingState();
+            appendBotMessage("Something unexpected happened while sending your question. Please try again.", "App runtime issue");
+            scrollMessagesToBottom();
+        }
+    }
+
     function chooseMission(text, source) {
         const input = document.getElementById("question");
 
@@ -383,6 +522,15 @@
     }
 
     window.addEventListener("load", () => {
+        if (!sessionStorage.getItem("healthy-recipe-browser-session")) {
+            sessionStorage.setItem("healthy-recipe-browser-session", "1");
+            const resetForm = document.getElementById("session-reset-form");
+            if (resetForm) {
+                resetForm.submit();
+                return;
+            }
+        }
+
         countChars();
         const messagesArea = document.getElementById("messages-area");
         if (messagesArea) {
@@ -408,6 +556,11 @@
                 sessionStorage.setItem("fitmind-scroll-chat", "1");
             });
         });
+
+        const chatForm = document.getElementById("chat-form");
+        if (chatForm) {
+            chatForm.addEventListener("submit", submitChatForm);
+        }
 
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {

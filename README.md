@@ -45,7 +45,7 @@ Set these before running the app:
 - `FLASK_SECRET_KEY`
 - `AWS_REGION`
 - `BEDROCK_KNOWLEDGE_BASE_ID`
-- `BEDROCK_MODEL_ARN`
+- `BEDROCK_MODEL_ID` or `BEDROCK_MODEL_ARN`
 
 Optional:
 
@@ -63,6 +63,20 @@ pip install -r requirements.txt
 Run the app:
 
 ```bash
+export FLASK_SECRET_KEY=change-me
+export AWS_REGION=us-east-1
+export BEDROCK_KNOWLEDGE_BASE_ID=your-kb-id
+export BEDROCK_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0
+python app.py
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:FLASK_SECRET_KEY="change-me"
+$env:AWS_REGION="us-east-1"
+$env:BEDROCK_KNOWLEDGE_BASE_ID="your-kb-id"
+$env:BEDROCK_MODEL_ID="global.anthropic.claude-haiku-4-5-20251001-v1:0"
 python app.py
 ```
 
@@ -86,7 +100,7 @@ docker run -p 5000:5000 \
   -e FLASK_SECRET_KEY=change-me \
   -e AWS_REGION=us-east-1 \
   -e BEDROCK_KNOWLEDGE_BASE_ID=your-kb-id \
-  -e BEDROCK_MODEL_ARN=your-model-arn \
+  -e BEDROCK_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0 \
   healthy-recipe-journal
 ```
 

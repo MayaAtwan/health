@@ -7,7 +7,7 @@ from time import time
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
-from flask import Flask, render_template, request, session
+from flask import Flask, jsonify, render_template, request, session
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fitmind-dev-secret")
@@ -19,6 +19,7 @@ app.config.update(
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 KNOWLEDGE_BASE_ID = os.environ.get("BEDROCK_KNOWLEDGE_BASE_ID", "")
 MODEL_ARN = os.environ.get("BEDROCK_MODEL_ARN", "")
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "global.anthropic.claude-haiku-4-5-20251001-v1:0")
 MAX_HISTORY = 12
 MAX_CHATS = 6
 CHAT_STORAGE_DIR = Path(app.instance_path) / "chat_sessions"
@@ -56,6 +57,16 @@ def get_session_chat_id() -> str:
 def get_chat_store_path() -> Path:
     cleanup_expired_chat_sessions()
     return CHAT_STORAGE_DIR / f"{get_session_chat_id()}.json"
+
+
+def clear_current_chat_store() -> None:
+    store_path = get_chat_store_path()
+
+    try:
+        if store_path.exists():
+            store_path.unlink()
+    except OSError:
+        pass
 
 
 def load_chats_from_store() -> list:
@@ -134,6 +145,16 @@ def delete_chat(chats: list, chat_id: str) -> tuple[list, dict]:
     return remaining_chats, active_chat
 
 
+def reset_browser_session_chats() -> tuple[list, dict]:
+    clear_current_chat_store()
+    session.pop("active_chat_id", None)
+    replacement_chat = new_chat("Current chat")
+    session["active_chat_id"] = replacement_chat["id"]
+    save_chats_to_store([replacement_chat])
+    session.modified = True
+    return [replacement_chat], replacement_chat
+
+
 def build_chat_summaries(chats: list) -> list:
     summaries = []
 
@@ -166,12 +187,71 @@ def render_home(question: str, chats: list, active_chat: dict, chat_history: lis
     )
 
 
+def submit_question(chats: list, active_chat: dict, question: str, answer_style: str) -> dict:
+    result = query_bedrock_knowledge_base(question, answer_style)
+
+    if active_chat["title"] in {"New chat", "Current chat"}:
+        active_chat["title"] = question[:42] + ("..." if len(question) > 42 else "")
+
+    chat_history = active_chat["messages"]
+    user_message = {"role": "user", "label": "Your note", "text": question}
+    bot_message = {
+        "role": "bot",
+        "label": "Journal answer",
+        "text": result["answer"],
+        "source": result["source"],
+        "answer_style": answer_style,
+    }
+
+    chat_history.append(user_message)
+    chat_history.append(bot_message)
+    chat_history = chat_history[-MAX_HISTORY:]
+    active_chat["messages"] = chat_history
+    save_chats(chats)
+
+    return {
+        "user_message": user_message,
+        "bot_message": bot_message,
+        "active_chat_id": active_chat["id"],
+        "active_chat_title": active_chat["title"],
+        "chat_summaries": build_chat_summaries(chats),
+    }
+
+
+def resolve_model_arn() -> str:
+    if MODEL_ARN:
+        return MODEL_ARN
+
+    if not MODEL_ID:
+        return ""
+
+    if MODEL_ID.startswith("arn:"):
+        return MODEL_ID
+
+    if MODEL_ID.startswith(("global.", "us.", "eu.", "apac.", "au.")):
+        return MODEL_ID
+
+    resource_type = "foundation-model"
+    return f"arn:aws:bedrock:{REGION}::{resource_type}/{MODEL_ID}"
+
+
+def describe_runtime_identity() -> str:
+    try:
+        sts_client = boto3.client("sts", region_name=REGION)
+        identity = sts_client.get_caller_identity()
+        account_id = identity.get("Account", "unknown-account")
+        return f"region={REGION}, account={account_id}"
+    except Exception:
+        return f"region={REGION}, account=unavailable"
+
+
 def query_bedrock_knowledge_base(question: str, answer_style: str = "simple") -> dict:
-    if not KNOWLEDGE_BASE_ID or not MODEL_ARN:
+    model_arn = resolve_model_arn()
+
+    if not KNOWLEDGE_BASE_ID or not model_arn:
         return {
-            "answer": "The knowledge base is not configured yet. Add the Bedrock settings, then try your question again.",
+            "answer": "The knowledge base is not configured yet. Add AWS_REGION, BEDROCK_KNOWLEDGE_BASE_ID, and either BEDROCK_MODEL_ID or BEDROCK_MODEL_ARN, then try again.",
             "source": "App setup needed",
-            "related_questions": [],
         }
 
     if answer_style == "simple":
@@ -207,7 +287,7 @@ User question:
                 "type": "KNOWLEDGE_BASE",
                 "knowledgeBaseConfiguration": {
                     "knowledgeBaseId": KNOWLEDGE_BASE_ID,
-                    "modelArn": MODEL_ARN,
+                    "modelArn": model_arn,
                     "retrievalConfiguration": {
                         "vectorSearchConfiguration": {
                             "numberOfResults": 5,
@@ -220,19 +300,18 @@ User question:
         return {
             "answer": "AWS credentials are missing, so the app cannot reach Bedrock right now.",
             "source": "AWS sign-in needed",
-            "related_questions": [],
         }
     except ClientError as exc:
+        error_message = exc.response.get("Error", {}).get("Message", str(exc))
+        runtime_identity = describe_runtime_identity()
         return {
-            "answer": "Bedrock returned an error while trying to answer your question. Check the AWS setup and try again.",
+            "answer": f"Bedrock returned an error while trying to answer your question: {error_message} ({runtime_identity}, kb={KNOWLEDGE_BASE_ID})",
             "source": "Amazon Bedrock error",
-            "related_questions": [],
         }
     except Exception as exc:  # pragma: no cover - AWS runtime behavior
         return {
             "answer": "Something unexpected happened while generating the answer. Please try again.",
             "source": "App runtime issue",
-            "related_questions": [],
         }
 
     citations = response.get("citations", [])
@@ -250,10 +329,6 @@ User question:
     return {
         "answer": response.get("output", {}).get("text", "").strip() or "No answer returned from Bedrock.",
         "source": ", ".join(source_names[:2]) if source_names else "Amazon Bedrock Knowledge Base",
-        "related_questions": [
-            "Can you turn that into a simple recipe?",
-            "Can you make that fit a healthier eating plan?",
-        ],
     }
 
 
@@ -289,6 +364,10 @@ def home():
                 active_chat = get_active_chat(chats)
             return render_home("", chats, active_chat)
 
+        if action == "reset_session":
+            chats, active_chat = reset_browser_session_chats()
+            return render_home("", chats, active_chat, [])
+
         if action == "clear":
             active_chat["messages"] = []
             save_chats(chats)
@@ -298,24 +377,24 @@ def home():
         answer_style = request.form.get("answer_style", "simple")
 
         if question:
-            result = query_bedrock_knowledge_base(question, answer_style)
-            if active_chat["title"] in {"New chat", "Current chat"}:
-                active_chat["title"] = question[:42] + ("..." if len(question) > 42 else "")
-
-            chat_history.append({"role": "user", "label": "Your note", "text": question})
-            chat_history.append({
-                "role": "bot",
-                "label": "Journal answer",
-                "text": result["answer"],
-                "source": result["source"],
-                "related_questions": result["related_questions"],
-                "answer_style": answer_style,
-            })
-            chat_history = chat_history[-MAX_HISTORY:]
-            active_chat["messages"] = chat_history
-            save_chats(chats)
+            submit_question(chats, active_chat, question, answer_style)
+            chat_history = active_chat["messages"]
 
     return render_home(question, chats, active_chat, chat_history)
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    chats = get_chats()
+    active_chat = get_active_chat(chats)
+    question = request.form.get("question", "").strip()
+    answer_style = request.form.get("answer_style", "simple")
+
+    if not question:
+        return jsonify({"error": "Question is required."}), 400
+
+    payload = submit_question(chats, active_chat, question, answer_style)
+    return jsonify(payload)
 
 
 if __name__ == "__main__":
