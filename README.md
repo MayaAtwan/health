@@ -38,6 +38,8 @@ The knowledge base was created from a small but meaningful set of recipe documen
 - `12_tuna_green_salad.txt`
 - `17_baked_lemon_salmon.txt`
 
+All of the recipe files in `data/` were personally created and written by me for this project. They are my own recipe notes and healthy meal examples, and they were used as the source documents for the Bedrock Knowledge Base.
+
 These files are not read directly by Flask at runtime. They are uploaded to S3, synced into Amazon Bedrock, chunked and indexed, and then queried through the Bedrock Knowledge Base API.
 
 ## How the app works
