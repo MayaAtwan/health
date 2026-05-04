@@ -213,7 +213,7 @@ This page shows the app answering a sweet snack question using the healthy snack
 ![Local app sweet snack answer](docs/screenshots/11-local-app-sweet-snack-answer.png)
 
 ### 12. Docker container running locally
-This page shows the local `docker ps` result, proving the `healthy-recipe-journal` container was running on port `5000`.
+This page shows the local `docker ps` result, proving the app Docker image was running locally and mapped to port `5000`.
 
 ![Docker local run](docs/screenshots/12-docker-local-run.png)
 
