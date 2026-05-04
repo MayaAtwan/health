@@ -233,11 +233,11 @@ This page shows that the deployed app does not invent answers for unrelated topi
 ![Out-of-scope question handling](docs/screenshots/16-out-of-scope-question.png)
 
 ### 16. Demo recording
-GitHub does not always preview local `.mp4` files inline in every view, so both options are included below.
+GitHub displays GIF previews much more reliably than inline local video, so the demo is shown below as a GIF. The original `.mp4` recording is still included as a separate file link.
 
-<video controls src="docs/screenshots/15-public-ec2-demo-recording.mp4" width="900"></video>
+![Public EC2 demo GIF](docs/screenshots/15-public-ec2-demo-recording.gif)
 
-Direct file link:
+Original video file:
 
 [Open or download the demo recording](docs/screenshots/15-public-ec2-demo-recording.mp4)
 
