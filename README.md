@@ -1,5 +1,7 @@
 # Healthy Recipe Journal RAG App
 
+![Healthy Recipe Journal app preview](docs/screenshots/00-app-preview.png)
+
 ## Project overview
 This project is a topic-based RAG web application built around a personal topic: healthy recipes and food habits. The app lets a user ask questions about meal ideas, healthy ingredients, and simple recipe planning, then answers with content retrieved from an Amazon Bedrock Knowledge Base.
 
