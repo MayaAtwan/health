@@ -227,7 +227,12 @@ This page shows the app running publicly from the EC2 public IP and answering a 
 
 ![Public EC2 app answer](docs/screenshots/14-public-ec2-app-answer.png)
 
-### 15. Demo recording
+### 15. Out-of-scope question handling
+This page shows that the deployed app does not invent answers for unrelated topics. When asked about the weather in Paris, it stays within the healthy-recipe scope and explains that the request is outside its knowledge base.
+
+![Out-of-scope question handling](docs/screenshots/16-out-of-scope-question.png)
+
+### 16. Demo recording
 GitHub does not always preview local `.mp4` files inline in every view, so both options are included below.
 
 <video controls src="docs/screenshots/15-public-ec2-demo-recording.mp4" width="900"></video>
