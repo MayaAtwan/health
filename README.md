@@ -158,77 +158,77 @@ http://23.21.9.140:5000
 ## Screenshots and proof
 
 ### 1. S3 upload completed
-This page shows that the recipe documents were uploaded successfully to the S3 bucket that was later connected to Bedrock.
+This page shows the S3 success message after the recipe files were uploaded to the bucket for the project.
 
 ![S3 upload success](docs/screenshots/01-s3-upload-success.png)
 
 ### 2. S3 bucket contents
-This page shows the final `healthy-recipes/` folder and the actual text documents stored in the bucket for the project.
+This page shows the S3 bucket contents after upload, including the `healthy-recipes/` folder and the recipe text files that were used as the data source.
 
 ![S3 bucket objects](docs/screenshots/02-s3-bucket-objects.png)
 
 ### 3. Bedrock vector store setup
-This page shows the Knowledge Base storage configuration, including `Titan Text Embeddings v2` and `Amazon OpenSearch Serverless`.
+This page shows the Bedrock Knowledge Base setup screen where the storage configuration was selected, including the embeddings model and the vector store choice.
 
 ![Bedrock storage and vector setup](docs/screenshots/03-kb-storage-and-vector-setup.png)
 
 ### 4. Knowledge Base overview
-This page shows the created `healthy-recipe-journal-kb`, the Knowledge Base ID, and the attached data source summary.
+This page shows the created `healthy-recipe-journal-kb` overview, including the Knowledge Base ID, status, and attached S3 data source information.
 
 ![Knowledge Base overview](docs/screenshots/04-kb-overview.png)
 
 ### 5. Data source sync completed
-This page shows that the Bedrock data source sync completed successfully and that the uploaded recipe files were ingested.
+This page shows the data source page after sync completed successfully, confirming that the uploaded recipe files were ingested into the Knowledge Base.
 
 ![Data source sync complete](docs/screenshots/05-data-source-sync-complete.png)
 
 ### 6. Knowledge Base retrieval test
-This page shows a Bedrock retrieval-only test where relevant chunks were found for the query `tuna green salad`.
+This page shows a Bedrock retrieval-only test for `tuna green salad`, where source chunks were successfully found from the synced documents.
 
 ![Knowledge Base retrieval test](docs/screenshots/06-kb-test-retrieval-only.png)
 
 ### 7. Knowledge Base generated answer
-This page shows Bedrock generating a final answer from the synced recipe content, proving retrieval and generation worked together.
+This page shows Bedrock retrieval plus response generation, where the console returned a final answer based on the recipe documents in the Knowledge Base.
 
 ![Knowledge Base generated answer](docs/screenshots/07-kb-test-generated-answer.png)
 
 ### 8. Themed homepage
-This page shows the home screen of the Flask app with the healthy-journal theme, styled to match the chosen topic.
+This page shows the app home page and its healthy-journal visual style before asking a question.
 
 ![App homepage theme](docs/screenshots/08-app-homepage-theme.png)
 
 ### 9. Local Flask app answer
-This page shows the local app answering a high-protein breakfast question with recipe suggestions grounded in the knowledge base.
+This page shows the local Flask app answering a high-protein breakfast question with grounded recipe suggestions and cited source files.
 
 ![Local app breakfast answer](docs/screenshots/09-local-app-breakfast-answer.png)
 
 ### 10. Local recipe answer example
-This page shows another local test where the app answered a seafood and shrimp recipe question from the uploaded documents.
+This page shows another local Flask test where the app answered a seafood and shrimp recipe question from the uploaded recipe documents.
 
 ![Local app shrimp answer](docs/screenshots/10-local-app-shrimp-answer.png)
 
 ### 11. Local snack answer example
-This page shows the app answering a sweet snack question using the healthy snack documents in the Bedrock Knowledge Base.
+This page shows the local app answering a sweet snack question using the healthy snack documents stored in the Knowledge Base.
 
 ![Local app sweet snack answer](docs/screenshots/11-local-app-sweet-snack-answer.png)
 
 ### 12. Docker container running locally
-This page shows the local `docker ps` result, proving the app Docker image was running locally and mapped to port `5000`.
+This page shows the local `docker ps` output, proving that the Dockerized app was running locally and mapped to port `5000`.
 
 ![Docker local run](docs/screenshots/12-docker-local-run.png)
 
 ### 13. EC2 instance details
-This page shows the EC2 instance details used for deployment, including the public IP and instance name.
+This page shows the EC2 instance details used for deployment, including the instance name, running status, and public IP address.
 
 ![EC2 instance details](docs/screenshots/13-ec2-instance-details.png)
 
 ### 14. Public EC2 app with real answer
-This page shows the app running publicly from the EC2 public IP and answering a real user question through the deployed container.
+This page shows the deployed app opened through the EC2 public IP and returning a real answer from the public Docker deployment.
 
 ![Public EC2 app answer](docs/screenshots/14-public-ec2-app-answer.png)
 
 ### 15. Out-of-scope question handling
-This page shows that the deployed app does not invent answers for unrelated topics. When asked about the weather in Paris, it stays within the healthy-recipe scope and explains that the request is outside its knowledge base.
+This page shows that the deployed app does not invent answers for unrelated topics. When asked about the weather in Paris, it stays within the recipe scope and explains that the question is outside its knowledge base.
 
 ![Out-of-scope question handling](docs/screenshots/16-out-of-scope-question.png)
 
